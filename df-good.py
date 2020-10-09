@@ -1,19 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# #### Good Example
-# \begin{align*}
-# NM:
-# \begin{cases}
-# & x_{n+1}=(I+\eta \left[\begin{matrix}0.1 & 0.5 \\ 0 & 0.1 \end{matrix}\right]) x_n+\sqrt{\eta}\left[\begin{matrix}0.7 & -0.6 \\ 0 & 0.7 \end{matrix}\right]u_n, \quad x_0=\left[\begin{matrix} 1 \\ -1 \end{matrix}\right]\\
-# & y_n=\left[\begin{matrix}1 &0\\0 & 1 \end{matrix}\right]x_n+\sigma_0 v_n, \quad \sigma_0=0.5
-# \end{cases}
-# \end{align*}
-# 
-
-# In[1]:
-
-
 #--------------------------------------
 # library loading
 #--------------------------------------
@@ -23,6 +10,7 @@ import pandas as pd
 import tensorflow as tf
 from tensorflow import keras
 import matplotlib.pyplot as plt
+
 #from ipython import get_ipython
 #get_ipython().run_line_magic('matplotlib', 'inline')
 #get_ipython().run_line_magic('config', "InlineBackend.figure_format = 'svg'")
@@ -60,10 +48,6 @@ v=[rng.multivariate_normal(np.zeros(dimY),np.eye(dimY),1).reshape(dimY,1) for i 
 u=np.array(u)
 v=np.array(v)
 
-
-# In[2]:
-
-
 #--------------------------------------
 # Monte Carlo Simulation for once
 #--------------------------------------
@@ -72,10 +56,10 @@ def mc_simulation(F,G,H,u,v,sigma0_train,N):
        N: time step horizon.
        sigma0_train: observation noise."""
     x_raw=np.zeros((N+1,dimX,1)); x_raw[0]=x0                                     
-    y_raw=np.zeros((N+1,dimY,1)); y_raw[0]=H*x0+sigma0_train*v[0] #!!!
+    y_raw=np.zeros((N+1,dimY,1)); y_raw[0]=H@x0+sigma0_train*v[0] #!!!
     for k in range(N):
-        x_raw[k+1]=F*x_raw[k]+G*u[k]  #!!!
-        y_raw[k+1]=H*x_raw[k+1]+sigma0_train*v[k+1] #!!!
+        x_raw[k+1]=F@x_raw[k]+G@u[k]  #!!!
+        y_raw[k+1]=H@x_raw[k+1]+sigma0_train*v[k+1] #!!!
     return x_raw, y_raw
 
 #---------------------------------------
@@ -89,11 +73,11 @@ def kalman_filtering(F,G,H,Q0,R0,x0,y_raw,N):
     
     for k in range(N):
         #y_raw has to be column array or vector.
-        inv=np.linalg.inv(H*R[k]*H.T+R0)
-        x_hat[k+1]=F*x_hat[k]+F*R[k]*H.T*inv*(y_raw[k]-H*x_hat[k]) #!!!
-        R[k+1]=F*(R[k]-R[k]*H.T*inv*H*R[k])*F.T+G*Q0*G.T           #!!!
+        inv=np.linalg.inv(H@R[k]@H.T+R0)
+        x_hat[k+1]=F@x_hat[k]+F@R[k]@H.T@inv@(y_raw[k]-H@x_hat[k]) #!!!
+        R[k+1]=F@(R[k]-R[k]@H.T@inv@H@R[k])@F.T+G@Q0@G.T           #!!!
         
-    x_bar=[x_hat[k]+R[k]*H.T*np.linalg.inv(H*R[k]*H.T+R0)*(y_raw[k]-H*x_hat[k]) for k in range(N+1)]
+    x_bar=[x_hat[k]+R[k]@H.T@np.linalg.inv(H@R[k]@H.T+R0)@(y_raw[k]-H@x_hat[k]) for k in range(N+1)]
     x_bar=np.array(x_bar) #make list to np.array
     
     return x_hat, x_bar
@@ -143,16 +127,8 @@ def sample_generator(Q0,R0,sigma0_train):
     
     return datas,labels,x_hats,x_bars,x_raws,y_raws
 
-
-# In[ ]:
-
-
 # call sample_generator function to generate sample
-#datas, labels, x_hats,x_bars,x_raws, y_raws=sample_generator(sigma0_train)
-
-
-# In[3]:
-
+#datas, labels, x_hats,x_bars,x_raws, y_raws=sample_generator(Q0,R0,sigma0_train)
 
 #-------------------------------
 # Deep Filtering Function
@@ -240,10 +216,6 @@ def deep_filtering(datas,labels,x_hats,x_bars,x_raws,y_raws):
     
     return model,data_mean,data_std
 
-
-# In[3]:
-
-
 #----------------------------------------
 # plot on new data
 #----------------------------------------
@@ -281,34 +253,6 @@ def graph_plot(N_new):
     ax[1].set_xlim((0,5))
     ax[1].minorticks_on()
     plt.show()
-
-
-# ### Error Dependece Analysis
-# 
-# \begin{align*}
-# NM:
-# \begin{cases}
-# & x_{n+1}=(I+\eta \left[\begin{matrix}0.1 & 0.5 \\ 0 & 0.1 \end{matrix}\right]) x_n+\sqrt{\eta}\left[\begin{matrix}0.7 & -0.6 \\ 0 & 0.7 \end{matrix}\right]u_n, \quad x_0=\left[\begin{matrix} 1 \\ -1 \end{matrix}\right]\\
-# & y_n=\left[\begin{matrix}1 &0\\0 & 1 \end{matrix}\right]x_n+\sigma_0^{NM} v_n
-# \end{cases}
-# \end{align*}
-# 
-# \begin{align*}
-# AM:
-# \begin{cases}
-# & x_{n+1}=(I+\eta \left[\begin{matrix}0.1 & 0.5 \\ 0 & 0.1 \end{matrix}\right]) x_n+\sqrt{\eta}\left[\begin{matrix}0.7 & -0.6 \\ 0 & 0.7 \end{matrix}\right]u_n, \quad x_0=\left[\begin{matrix} 1 \\ -1 \end{matrix}\right]\\
-# & y_n=\left[\begin{matrix}1 &0\\0 & 1 \end{matrix}\right]x_n+\sigma_0^{AM} v_n
-# \end{cases}
-# \end{align*}
-# 
-# ---
-# 
-# 1. Error Dependence on $\sigma_0^{NM}$, fix $\sigma_0^{AM}=0.5$ and vary $\sigma_0^{NM}=0.1, 0.5, 1.0, 1.5, 2.0, 2.5.$
-# 
-# 2. Error Dependence on $\sigma_0^{AM}$, fix $\sigma_0^{NM}=0.5$ and vary $\sigma_0^{AM}=0.1, 0.5, 1.0, 1.5, 2.0, 2.5.$
-
-# In[26]:
-
 
 #---------------------------------------------------------
 # Robustness Analysis for NM
@@ -350,9 +294,6 @@ def robust_analysis_NM():
 
 # Call this function
 robust_analysis_NM()
-
-
-# In[27]:
 
 
 #---------------------------------------------------------
@@ -397,9 +338,6 @@ def robust_analysis_AM():
 
 # Call this function
 robust_analysis_AM()
-
-
-# In[ ]:
 
 
 
