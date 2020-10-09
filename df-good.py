@@ -23,7 +23,7 @@ import pandas as pd
 import tensorflow as tf
 from tensorflow import keras
 import matplotlib.pyplot as plt
-from Ipython import get_ipython
+from ipython import get_ipython
 get_ipython().run_line_magic('matplotlib', 'inline')
 get_ipython().run_line_magic('config', "InlineBackend.figure_format = 'svg'")
 
