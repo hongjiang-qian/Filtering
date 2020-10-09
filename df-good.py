@@ -23,6 +23,7 @@ import pandas as pd
 import tensorflow as tf
 from tensorflow import keras
 import matplotlib.pyplot as plt
+from Ipython import get_ipython
 get_ipython().run_line_magic('matplotlib', 'inline')
 get_ipython().run_line_magic('config', "InlineBackend.figure_format = 'svg'")
 
@@ -71,10 +72,10 @@ def mc_simulation(F,G,H,u,v,sigma0_train,N):
        N: time step horizon.
        sigma0_train: observation noise."""
     x_raw=np.zeros((N+1,dimX,1)); x_raw[0]=x0                                     
-    y_raw=np.zeros((N+1,dimY,1)); y_raw[0]=H@x0+sigma0_train*v[0] #!!!
+    y_raw=np.zeros((N+1,dimY,1)); y_raw[0]=H*x0+sigma0_train*v[0] #!!!
     for k in range(N):
-        x_raw[k+1]=F@x_raw[k]+G@u[k]  #!!!
-        y_raw[k+1]=H@x_raw[k+1]+sigma0_train*v[k+1] #!!!
+        x_raw[k+1]=F*x_raw[k]+G*u[k]  #!!!
+        y_raw[k+1]=H*x_raw[k+1]+sigma0_train*v[k+1] #!!!
     return x_raw, y_raw
 
 #---------------------------------------
@@ -88,11 +89,11 @@ def kalman_filtering(F,G,H,Q0,R0,x0,y_raw,N):
     
     for k in range(N):
         #y_raw has to be column array or vector.
-        inv=np.linalg.inv(H@R[k]@H.T+R0)
-        x_hat[k+1]=F@x_hat[k]+F@R[k]@H.T@inv@(y_raw[k]-H@x_hat[k]) #!!!
-        R[k+1]=F@(R[k]-R[k]@H.T@inv@H@R[k])@F.T+G@Q0@G.T           #!!!
+        inv=np.linalg.inv(H*R[k]*H.T+R0)
+        x_hat[k+1]=F*x_hat[k]+F*R[k]*H.T*inv*(y_raw[k]-H*x_hat[k]) #!!!
+        R[k+1]=F*(R[k]-R[k]*H.T*inv*H*R[k])*F.T+G*Q0*G.T           #!!!
         
-    x_bar=[x_hat[k]+R[k]@H.T@np.linalg.inv(H@R[k]@H.T+R0)@(y_raw[k]-H@x_hat[k]) for k in range(N+1)]
+    x_bar=[x_hat[k]+R[k]*H.T*np.linalg.inv(H*R[k]*H.T+R0)*(y_raw[k]-H*x_hat[k]) for k in range(N+1)]
     x_bar=np.array(x_bar) #make list to np.array
     
     return x_hat, x_bar
