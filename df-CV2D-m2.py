@@ -154,7 +154,7 @@ def sample_generator(Q0,R0,sigma0_train):
         data=np.zeros((N-n0+2,n0,dimY)) #store data for each sample
         label=np.zeros((N-n0+2,dimX))
         # call ekf_mc function to generate sample
-        x_raw,y_raw=ekf_mc(F0,h,u,v,x0,sigma0_train,N)
+        x_raw,y_raw=ekf_mc(F0,h,u,v,x0,sigma_train,N)
         x_raws[i]=x_raw; y_raws[i]=y_raw
         
         # call extended_kf function to compute estimation
@@ -270,6 +270,8 @@ def deep_filtering(datas,labels,x_hats,x_bars,x_raws,y_raws):
     #plt.plot(epochs, val_loss_value,'b',label='Validation Loss')
     #plt.legend()
     #plt.show()
+    
+    return model, data_mean, data_std, label_mean, label_std
 #---------------------------
 # plot on new data
 #---------------------------
