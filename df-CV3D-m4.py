@@ -180,7 +180,7 @@ def sample_generator(Q0,R0,sigma0_train):
         data=np.zeros((N-n0+2,n0,dimY)) #store data for each sample
         label=np.zeros((N-n0+2,dimX))
         # call ekf_mc function to generate sample
-        x_raw,y_raw=ekf_mc(F0,h,u,v,x0,sigma0_train)
+        x_raw,y_raw=ekf_mc(F0,h,u,v,x0,sigma0_train,N)
         x_raws[i]=x_raw; y_raws[i]=y_raw
         
         # call extended_kf function to compute estimation
@@ -204,8 +204,6 @@ def sample_generator(Q0,R0,sigma0_train):
         x_bars[i*(N-n0+2):(i+1)*(N-n0+2)]=x_bar[n0-1:]
     
     return datas,labels,x_hats,x_bars,x_raws,y_raws
-
-
 
 # call sample_generator function to generate sample
 #datas, labels, x_hats,x_bars,x_raws, y_raws=sample_generator() 
@@ -304,8 +302,8 @@ def deep_filtering(datas,labels,x_hats,x_bars,x_raws,y_raws):
 # plot on new data
 #-------------------------------------------------------------
 def graph_plot(N):
-    x_new, y_new=ekf_mc()
-    x_hat_new, x_bar_new=extended_kf(f,g,h,F,G,H,Q0,R0,x0,y_new)
+    x_new, y_new=ekf_mc(F0,h,u,v,x0,sigma0_train,N)
+    x_hat_new, x_bar_new=extended_kf(f,g,h,F,G,H,Q0,R0,x0,y_new,N)
     y_new=y_new.reshape(N+1,dimY)
     data_new=np.zeros((N-n0+2,n0,dimY))
     for k in range(N-n0+2):
