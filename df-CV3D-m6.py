@@ -469,9 +469,9 @@ def robust_analysis_AM():
         # input normalization
         data_new_AM=(data_new_AM-data_mean)/data_std # data_mean and data_std come from NM noise.
         df_pred=model.predict(data_new_AM)
-        for i in range(N-n0+2):
+        for k in range(N-n0+2):
             # convect df results back to original scale.
-            df_pred[i,:]=df_pred[i,:]*label_std+label_mean
+            df_pred[k,:]=df_pred[k,:]*label_std+label_mean
         from sklearn.metrics import mean_squared_error
         
         # Deep Filtering Error
