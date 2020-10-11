@@ -355,7 +355,7 @@ def graph_plot(N):
 
 # Run First time with sigma0_train
 datas,labels,x_hats,x_bars,x_raws,y_raws=sample_generator(Q0,R0,sigma0_train)
-model,data_mean,data_std,label_mean,label_std=deep_filtering(datas,labels,x_hats,x_bars,x_raw,y_raws)
+model,data_mean,data_std,label_mean,label_std=deep_filtering(datas,labels,x_hats,x_bars,x_raws,y_raws)
 graph_plot(N)
 
 #-------------------------------
