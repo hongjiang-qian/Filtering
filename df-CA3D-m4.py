@@ -13,8 +13,8 @@ import tensorflow as tf
 from tensorflow import keras
 import matplotlib.pyplot as plt
 
-%matplotlib inline
-%config InlineBackend.figure_format='svg'
+get_ipython().run_line_magic('matplotlib', 'inline')
+get_ipython().run_line_magic('config', "InlineBackend.figure_format = 'svg'")
 
 #set suppress to not use scientific counting
 np.set_printoptions(suppress=True) 
