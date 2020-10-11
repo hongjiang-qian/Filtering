@@ -282,9 +282,9 @@ def deep_filtering(datas,labels,x_hats,x_bars,x_raws,y_raws):
 
     end=time.perf_counter()
 
-    print("The test mse err of DF is {:.2%}"%(test_mse_score))
-    print("The test mse err of KF is {:.2%}"%(kf_mse_err))
-    print("The GPU consuming time is {:.3}"%(start-end))
+    print("The test mse err of DF is %.2f"%(test_mse_score))
+    print("The test mse err of KF is %.2f"%(kf_mse_err))
+    print("The GPU consuming time is %.2f"%(start-end))
 
     #history_dict=mymodel.history
     #history_dict.keys()
