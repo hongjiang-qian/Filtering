@@ -26,7 +26,7 @@ np.set_printoptions(suppress=True)
 start=time.perf_counter()
 
 # q1: variance of the process noise modeling the acceleration
-T=1; q2=1
+T=0.001; q2=1
 
 # qa1, qa2: variance for azimuth from sensor 1,2 resp.
 # qr, qe: variance for range and elevation resp.
@@ -50,7 +50,7 @@ x0=np.array([[21.68],
              [-0.0083],
              [0],
              [10.84],
-             [-0.39],
+             [-0.399],
              [0],
              [0.04],
              [0],
@@ -206,11 +206,6 @@ def sample_generator(Q0,R0,sigma0_train):
     
     return datas,labels,x_hats,x_bars,x_raws,y_raws
 
-
-# call sample_generator function to generate sample
-#datas, labels, x_hats,x_bars,x_raws, y_raws=sample_generator()
-
-
 #--------------------------
 # Deep Filtering Function
 #--------------------------
@@ -219,7 +214,7 @@ def deep_filtering(datas,labels,x_hats,x_bars,x_raws,y_raws):
     
     # Data preprocessing procedure
     datas=datas.reshape(((N-n0+2)*N_sample,dimY*n0))
-    # convert Numpy array into pandas DataFrame
+    # convert numpy array into pandas DataFrame
     datas=pd.DataFrame(datas)
     labels=pd.DataFrame(labels)
     x_hats=pd.DataFrame(x_hats)
@@ -284,7 +279,7 @@ def deep_filtering(datas,labels,x_hats,x_bars,x_raws,y_raws):
 
     print("The test mse err of DF is %.2f"%(test_mse_score))
     print("The test mse err of KF is %.2f"%(kf_mse_err))
-    print("The GPU consuming time is %.2f"%(start-end))
+    print("The GPU consuming time is %.2f"%(end-start))
 
     #history_dict=mymodel.history
     #history_dict.keys()
@@ -348,7 +343,6 @@ def graph_plot(N):
     ax[2][0].plot(axis, x_new[:,6],'c',axis,x_bar_new[:,6],'b',axis,df_new[:,6],'r',linewidth=0.5)
     ax[2][1].plot(axis, x_new[:,7],'c',axis,x_bar_new[:,7],'b',axis,df_new[:,7],'r',linewidth=0.5)
     ax[2][2].plot(axis, x_new[:,8],'c',axis,x_bar_new[:,8],'b',axis,df_new[:,8],'r',linewidth=0.5)
-
     fig.subplots_adjust(wspace=0.6, hspace=0.3)
     plt.savefig('CA3D-m4.pdf')
     #plt.show()
@@ -486,6 +480,7 @@ def robust_analysis_AM():
         print("For fixed sigma0_NM and sigma0_AM %.2f, the mse errs of DF and KF are: %.2f, %.2f"%(sigma0_AM[i],df_mse_err, kf_mse_err))  
         
 robust_analysis_NM()
+
 robust_analysis_AM()
 
 
