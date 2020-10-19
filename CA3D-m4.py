@@ -195,6 +195,14 @@ def sample_generator(Q0,R0,sigma0_train):
         x_hat=x_hat.reshape(N+1,dimX)
         x_bar=x_bar.reshape(N+1,dimX)
         
+        # ====================
+        # rescale m into km
+        x_raw=x_raw/1000
+        y_raw[:,0]=y_raw[:,0]/1000
+        x_hat=x_hat/1000
+        x_bar=x_bar/1000
+        #=====================
+        
         # make data and label for each sample
         for k in range(N-n0+2):
             data[k]=y_raw[k:k+n0]
@@ -309,6 +317,14 @@ def graph_plot(N):
     x_bar_new=x_bar_new.reshape(N+1,dimX)
     x_hat_new=x_hat_new.reshape(N+1,dimX)
     
+    #===========================
+    # rescale m into km
+    x_new=x_new/1000
+    y_new[:,0]=y_new[:,0]/1000
+    x_bar_new=x_bar_new/1000
+    x_hat_new=x_hat_new/1000
+    #=============================
+    
     data_new=np.zeros((N-n0+2,n0,dimY))
     
     for k in range(N-n0+2):
@@ -326,7 +342,7 @@ def graph_plot(N):
         # convect df results back to original scale.
         df_pred[k,:]=df_pred[k,:]*label_std+label_mean
         
-    df_new=[x0 for k in range(n0-1)]
+    df_new=[x0/1000 for k in range(n0-1)] #!!!!!
     df_new=np.array(df_new)
     df_new=df_new.reshape(n0-1,dimX)
     df_new=np.vstack((df_new,df_pred))
@@ -335,13 +351,6 @@ def graph_plot(N):
     df_mse_err=mean_squared_error(x_new[n0-1:],df_pred)
     kf_mse_err=mean_squared_error(x_new[n0-1:],x_bar_new[n0-1:])
     print("the mse errs of df and kf are: %.2f,%.2f"%(df_mse_err, kf_mse_err))
-    
-    #--------------------------------
-    # we plot in unit km.
-    x_new=x_new/1000
-    x_bar_new=x_bar_new/1000
-    df_new=df_new/1000
-    #-------------------------------
 
     plt.figure(dpi = 600,figsize=[40,30])
     axis=np.linspace(0,N+1,N+1)
@@ -420,18 +429,26 @@ def robust_analysis_NM():
         
         R0_NM[i]=sigma0_NM[i]*sigma0_NM[i]*R0
         # first train a DF model with NM noise for use
-        datas, labels, x_hats, x_bars, x_raws, y_raws=sample_generator(Q0,R0_NM[i],sigma0_NM[i]) #!!!
+        datas, labels, x_hats, x_bars, x_raws, y_raws=sample_generator(Q0,R0_NM[i],sigma0_NM[i]) #!!! Those data are rescaled.
         model, data_mean, data_std, label_mean, label_std=deep_filtering(datas,labels,x_hats,x_bars,x_raws,y_raws)
         
         # second generating samples with AM model noise
         x_raw_AM, y_raw_AM=ekf_mc(F0,h,u,v,x0,sigma0_AM,N)
-      
         # Riccati equation with NM, observation with AM
         x_hat, x_bar=extended_kf(f,g,h,F,G,H,Q0,R0_NM[i],x0,y_raw_AM,N)
         
         x_raw_AM=x_raw_AM.reshape(N+1,dimX)
         y_raw_AM=y_raw_AM.reshape(N+1,dimY)
         x_bar=x_bar.reshape(N+1,dimX)
+        x_hat=x_hat.reshape(N+1,dimX)
+        
+        #=========================
+        # rescale m into km
+        x_raw_AM=x_raw_AM/1000
+        y_raw_AM[:,0]=y_raw_AM[:,0]/1000
+        x_bar=x_bar/1000
+        x_hat=x_hat/1000
+        #=========================
         
         data_new_AM=np.zeros((N-n0+2,n0,dimY))
         
@@ -471,18 +488,27 @@ def robust_analysis_AM():
         
         R0_AM[i]=sigma0_AM[i]*sigma0_AM[i]*R0
         # first train a DF model with NM noise for use
-        datas, labels, x_hats, x_bars, x_raws, y_raws=sample_generator(Q0,R0_NM,sigma0_NM) #!!!
+        datas, labels, x_hats, x_bars, x_raws, y_raws=sample_generator(Q0,R0_NM,sigma0_NM) #!!! Those data are rescaled.
         model, data_mean, data_std, label_mean, label_std=deep_filtering(datas,labels,x_hats,x_bars,x_raws,y_raws)
         
         # second generating samples with AM model noise
         x_raw_AM, y_raw_AM=ekf_mc(F0,h,u,v,x0,sigma0_AM[i],N)
-        
         # Riccati equation with NM, observation with AM
         x_hat, x_bar=extended_kf(f,g,h,F,G,H,Q0,R0_NM,x0,y_raw_AM,N)
         
         x_raw_AM=x_raw_AM.reshape(N+1,dimX)
         y_raw_AM=y_raw_AM.reshape(N+1,dimY)
         x_bar=x_bar.reshape(N+1,dimX)
+        x_hat=x_hat.reshape(N+1,dimX)
+       
+        #=========================
+        # rescale m into km
+        x_raw_AM=x_raw_AM/1000
+        y_raw_AM[:,0]=y_raw_AM[:,0]/1000
+        x_bar=x_bar/1000
+        x_hat=x_hat/1000
+        #=========================
+        
         data_new_AM=np.zeros((N-n0+2,n0,dimY))
         
         for k in range(N-n0+2):
